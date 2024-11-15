@@ -1,6 +1,7 @@
 package WayofTime.alchemicalWizardry.common.summoning.meteor;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.regex.Matcher;
@@ -17,6 +18,7 @@ import WayofTime.alchemicalWizardry.AlchemicalWizardry;
 import cpw.mods.fml.common.Optional;
 import cpw.mods.fml.common.registry.GameRegistry;
 import gregtech.common.blocks.TileEntityOres;
+import org.lwjgl.Sys;
 
 public class MeteorParadigm {
 
