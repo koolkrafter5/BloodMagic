@@ -9,8 +9,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 
@@ -88,6 +90,45 @@ public class NEIMeteorRecipeHandler extends TemplateRecipeHandler {
 
                     List<String> tooltips = new ArrayList<>();
                     float chance = filler.getWeight() / totalFillerWeight * fillerRatio;
+                    tooltips.add(I18n.format("nei.recipe.meteor.chance", getFormattedChance(chance)));
+                    tooltips.add(I18n.format("nei.recipe.meteor.amount", getEstimatedAmount(chance, meteor.radius)));
+                    tooltips.add(I18n.format("nei.recipe.meteor.filler"));
+                    this.outputs.add(new TooltipStack(stack, xPos, yPos, tooltips));
+
+                    col++;
+                    if (col > 8) {
+                        col = 0;
+                        row++;
+                    }
+
+                    if (matchItem(focusStack, stack)) {
+                        this.focus = new Point(xPos - 1, yPos - 1);
+                    }
+                }
+            }
+
+            List<MeteorParadigmComponent> sortedFiller = new ArrayList<>(meteor.fillerList);
+
+            if (fillerChance > 0) {
+                if (col != 0) {
+                    col = 0;
+                    row++;
+                }
+
+                sortedFiller.sort(Comparator.comparingInt(c -> -c.getChance()));
+
+                if (sortedFiller.isEmpty()) {
+                    sortedFiller.add(new MeteorParadigmComponent(new ItemStack(Blocks.stone), 1));
+                    totalFillerWeight = 1;
+                }
+
+                for (MeteorParadigmComponent filler : sortedFiller) {
+                    ItemStack stack = filler.getValidBlockParadigm();
+                    int xPos = 3 + 18 * col;
+                    int yPos = 37 + 18 * row;
+
+                    List<String> tooltips = new ArrayList<>();
+                    float chance = filler.getChance() / totalFillerWeight * (float) (fillerChance / 100.0);
                     tooltips.add(I18n.format("nei.recipe.meteor.chance", getFormattedChance(chance)));
                     tooltips.add(I18n.format("nei.recipe.meteor.amount", getEstimatedAmount(chance, meteor.radius)));
                     tooltips.add(I18n.format("nei.recipe.meteor.filler"));
