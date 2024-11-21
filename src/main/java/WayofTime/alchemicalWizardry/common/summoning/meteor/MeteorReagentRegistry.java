@@ -81,14 +81,14 @@ public class MeteorReagentRegistry {
         double mult = 1.0;
         for (Reagent r : reagentList) {
             double change = reagents.get(r).fillerChanceMultiplier;
-            if (change > mult) {
+            if (change < mult) {
                 mult = change;
             }
         }
         return mult;
     }
 
-    // Return a list of the blocks that the given reagents will replace the filler with.
+    // Return a list of the blocks that the given reagents will use to replace filler.
     private static List<MeteorParadigmComponent> getFillerList(Reagent[] reagentList) {
         List<MeteorParadigmComponent> fillerList = new ArrayList<>();
         for (Reagent r : reagentList) {

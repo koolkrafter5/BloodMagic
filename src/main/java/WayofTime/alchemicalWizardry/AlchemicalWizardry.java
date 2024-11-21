@@ -13,6 +13,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import WayofTime.alchemicalWizardry.common.summoning.meteor.MeteorReagentRegistry;
+import WayofTime.alchemicalWizardry.common.summoning.meteor.MeteorRegistry;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
