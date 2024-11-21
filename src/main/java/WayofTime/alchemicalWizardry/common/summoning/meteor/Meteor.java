@@ -1,10 +1,8 @@
 package WayofTime.alchemicalWizardry.common.summoning.meteor;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.*;
 
+import com.google.gson.JsonObject;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 
@@ -32,6 +30,9 @@ public class Meteor {
         if (files != null) {
             try {
                 for (File f : files) {
+                    if (f.isDirectory()) {
+                        continue;
+                    }
                     BufferedReader br = new BufferedReader(new FileReader(f));
                     Meteor m = gson.fromJson(br, Meteor.class);
                     MeteorRegistry.registerMeteorParadigm(
