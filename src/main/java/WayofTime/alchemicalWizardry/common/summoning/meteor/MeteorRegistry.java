@@ -30,14 +30,17 @@ public class MeteorRegistry {
             if (fillerList != null && fillerList.length > 0) {
                 meteor.fillerList = MeteorParadigm.parseStringArray(fillerList);
             } else {
-                meteor.fillerList.add(new MeteorParadigmComponent(new ItemStack(Blocks.stone), 1));
+                meteor.fillerList.add(getDefaultStone());
             }
             paradigmList.add(meteor);
         }
     }
 
-    public static void createMeteorImpact(World world, int x, int y, int z, int paradigmID,
-            ArrayList<Reagent> reagents) {
+    public static MeteorParadigmComponent getDefaultStone() {
+        return new MeteorParadigmComponent(new ItemStack(Blocks.stone), 1);
+    }
+
+    public static void createMeteorImpact(World world, int x, int y, int z, int paradigmID, List<Reagent> reagents) {
         if (paradigmID < paradigmList.size()) {
             paradigmList.get(paradigmID).createMeteorImpact(world, x, y, z, reagents);
         }

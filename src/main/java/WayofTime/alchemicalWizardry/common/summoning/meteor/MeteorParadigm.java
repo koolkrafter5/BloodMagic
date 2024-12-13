@@ -1,5 +1,7 @@
 package WayofTime.alchemicalWizardry.common.summoning.meteor;
 
+import static WayofTime.alchemicalWizardry.common.summoning.meteor.MeteorReagentRegistry.getFillerList;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -14,6 +16,7 @@ import net.minecraftforge.oredict.OreDictionary;
 
 import WayofTime.alchemicalWizardry.AlchemicalWizardry;
 import WayofTime.alchemicalWizardry.api.alchemy.energy.Reagent;
+import WayofTime.alchemicalWizardry.api.alchemy.energy.ReagentRegistry;
 import cpw.mods.fml.common.Optional;
 import cpw.mods.fml.common.registry.GameRegistry;
 import gregtech.common.blocks.TileEntityOres;
@@ -29,10 +32,6 @@ public class MeteorParadigm {
 
     public static Random rand = new Random();
 
-    public MeteorParadigm(ItemStack focusStack, int radius, int cost) {
-        new MeteorParadigm(focusStack, radius, cost, 0);
-    }
-
     public MeteorParadigm(ItemStack focusStack, int radius, int cost, int fillerChance) {
         this.focusStack = focusStack;
         this.radius = radius;
@@ -40,10 +39,10 @@ public class MeteorParadigm {
         this.fillerChance = fillerChance;
     }
 
-    // modId:itemName:meta:weight
-    private static final Pattern itemNamePattern = Pattern.compile("(.*):(.*):(\\d+):(\\d+)");
-    // OREDICT:oreDictName:weight
-    private static final Pattern oredictPattern = Pattern.compile("OREDICT:(.*):(\\d+)");
+    // modId:itemName:meta:weight(:reagent1, reagent2, ... optional)
+    private static final Pattern itemNamePattern = Pattern.compile("(.*):(.*):(\\d+):(\\d+)(:.*)?");
+    // OREDICT:oreDictName:weight(:reagent1, reagent2, ... optional)
+    private static final Pattern oredictPattern = Pattern.compile("OREDICT:(.*):(\\d+)(:.*)?");
 
     public static List<MeteorParadigmComponent> parseStringArray(String[] blockArray) {
         List<MeteorParadigmComponent> addList = new ArrayList<>();
@@ -57,22 +56,28 @@ public class MeteorParadigm {
                 String itemName = matcher.group(2);
                 int meta = Integer.parseInt(matcher.group(3));
                 int weight = Integer.parseInt(matcher.group(4));
+                String reagent = matcher.group(5);
+
+                ArrayList<Reagent> reagentList = getReagents(reagent, blockName);
 
                 ItemStack stack = GameRegistry.findItemStack(modID, itemName, 1);
                 if (stack != null && stack.getItem() instanceof ItemBlock) {
                     stack.setItemDamage(meta);
-                    addList.add(new MeteorParadigmComponent(stack, weight));
+                    addList.add(new MeteorParadigmComponent(stack, weight, reagentList));
                     success = true;
                 }
 
             } else if ((matcher = oredictPattern.matcher(blockName)).matches()) {
                 String oreDict = matcher.group(1);
                 int weight = Integer.parseInt(matcher.group(2));
+                String reagent = matcher.group(3);
+
+                ArrayList<Reagent> reagentList = getReagents(reagent, blockName);
 
                 List<ItemStack> list = OreDictionary.getOres(oreDict);
                 for (ItemStack stack : list) {
                     if (stack != null && stack.getItem() instanceof ItemBlock) {
-                        addList.add(new MeteorParadigmComponent(stack, weight));
+                        addList.add(new MeteorParadigmComponent(stack, weight, reagentList));
                         success = true;
                         break;
                     }
@@ -81,12 +86,28 @@ public class MeteorParadigm {
             }
 
             if (!success) {
-                AlchemicalWizardry.logger.warn("Unable to add Meteor Paradigm \"" + blockName + "\"");
-                AlchemicalWizardry.logger
-                        .warn("Valid formats are modId:itemName:meta:weight and OREDICT:oreDictName:weight.");
+                AlchemicalWizardry.logger.warn("Unable to add Meteor Paradigm \"{}\"", blockName);
+                AlchemicalWizardry.logger.warn(
+                        "Valid formats are modId:itemName:meta:weight(:reagent1, reagent2, ... optional) and OREDICT:oreDictName:weight(:reagent1, reagent2, ... optional).");
             }
         }
         return addList;
+    }
+
+    private static ArrayList<Reagent> getReagents(String reagent, String blockName) {
+        ArrayList<Reagent> reagentList = new ArrayList<>();
+        if (reagent != null) {
+            String[] reagents = reagent.substring(1).split(", ?");
+            for (String str : reagents) {
+                Reagent r = ReagentRegistry.getReagentForKey(str);
+                if (r == null) {
+                    AlchemicalWizardry.logger.warn("Unable to add reagent \"{}\" for {}.", str, blockName);
+                    continue;
+                }
+                reagentList.add(r);
+            }
+        }
+        return reagentList;
     }
 
     public int getTotalListWeight(List<MeteorParadigmComponent> blockList) {
@@ -97,7 +118,7 @@ public class MeteorParadigm {
         return totalWeight;
     }
 
-    public void createMeteorImpact(World world, int x, int y, int z, ArrayList<Reagent> reagents) {
+    public void createMeteorImpact(World world, int x, int y, int z, List<Reagent> reagents) {
         int radius = getNewRadius(this.radius, reagents);
         int fillerChance = getNewFillerChance(this.fillerChance, reagents);
 
@@ -105,9 +126,8 @@ public class MeteorParadigm {
             world.createExplosion(null, x, y, z, radius * 4, MeteorReagentRegistry.doMeteorsDestroyBlocks(reagents));
         }
 
-        List<MeteorParadigmComponent> fillerList;
-
-        fillerList = getNewFillerList(this.fillerList, reagents);
+        List<MeteorParadigmComponent> componentList = removeBlocksMissingRequiredReagents(this.componentList, reagents);
+        List<MeteorParadigmComponent> fillerList = getNewFillerList(this.fillerList, reagents);
 
         int totalComponentWeight = getTotalListWeight(componentList);
         int totalFillerWeight = getTotalListWeight(fillerList);
@@ -133,13 +153,13 @@ public class MeteorParadigm {
         }
     }
 
-    private int getNewRadius(int radius, ArrayList<Reagent> reagents) {
+    private int getNewRadius(int radius, List<Reagent> reagents) {
         radius += MeteorReagentRegistry.getLargestRadiusIncrease(reagents);
         radius += MeteorReagentRegistry.getLargestRadiusDecrease(reagents);
         return Math.max(radius, 1);
     }
 
-    private int getNewFillerChance(int fillerChance, ArrayList<Reagent> reagents) {
+    private int getNewFillerChance(int fillerChance, List<Reagent> reagents) {
         fillerChance += MeteorReagentRegistry.getLargestFillerChanceIncrease(reagents);
         fillerChance += MeteorReagentRegistry.getLargestFillerChanceDecrease(reagents);
         fillerChance *= MeteorReagentRegistry.getLargestFillerChanceMultiplier(reagents);
@@ -148,13 +168,28 @@ public class MeteorParadigm {
     }
 
     private List<MeteorParadigmComponent> getNewFillerList(List<MeteorParadigmComponent> fillerList,
-            ArrayList<Reagent> reagents) {
-        List<MeteorParadigmComponent> reagentFillers = new ArrayList<>(MeteorReagentRegistry.getFillerList(reagents));
-        if (reagentFillers.isEmpty()) {
-            return fillerList;
-        } else {
+            List<Reagent> reagents) {
+        List<MeteorParadigmComponent> reagentFillers = getFillerList(reagents);
+        reagentFillers = removeBlocksMissingRequiredReagents(reagentFillers, reagents);
+        if (!reagentFillers.isEmpty()) {
             return reagentFillers;
         }
+        List<MeteorParadigmComponent> newFillers = removeBlocksMissingRequiredReagents(fillerList, reagents);
+        if (newFillers.isEmpty()) { // Fall back on the default if every filler requires a reagent
+            newFillers.add(MeteorRegistry.getDefaultStone());
+        }
+        return newFillers;
+    }
+
+    private List<MeteorParadigmComponent> removeBlocksMissingRequiredReagents(List<MeteorParadigmComponent> blockList,
+            List<Reagent> reagents) {
+        ArrayList<MeteorParadigmComponent> newList = new ArrayList<>();
+        for (MeteorParadigmComponent mpc : blockList) {
+            if (mpc.checkForReagent(reagents)) {
+                newList.add(mpc);
+            }
+        }
+        return newList;
     }
 
     private void setMeteorBlock(int x, int y, int z, World world, List<MeteorParadigmComponent> blockList,
@@ -164,7 +199,7 @@ public class MeteorParadigm {
             randNum -= mpc.getWeight();
 
             if (randNum < 0) {
-                ItemStack blockStack = mpc.getValidBlockParadigm();
+                ItemStack blockStack = mpc.getBlock();
                 if (blockStack != null && blockStack.getItem() instanceof ItemBlock) {
                     ((ItemBlock) blockStack.getItem())
                             .placeBlockAt(blockStack, null, world, x, y, z, 0, 0, 0, 0, blockStack.getItemDamage());

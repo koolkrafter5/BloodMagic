@@ -49,9 +49,12 @@ public class MeteorReagentRegistry {
     }
 
     // Return the one largest radius increase.
-    public static int getLargestRadiusIncrease(ArrayList<Reagent> reagentList) {
+    public static int getLargestRadiusIncrease(List<Reagent> reagentList) {
         int increase = 0;
         for (Reagent r : reagentList) {
+            if (!reagents.containsKey(r)) {
+                continue;
+            }
             int change = reagents.get(r).radiusChange;
             if (change > increase) {
                 increase = change;
@@ -61,9 +64,12 @@ public class MeteorReagentRegistry {
     }
 
     // Return the one largest radius decrease.
-    public static int getLargestRadiusDecrease(ArrayList<Reagent> reagentList) {
+    public static int getLargestRadiusDecrease(List<Reagent> reagentList) {
         int decrease = 0;
         for (Reagent r : reagentList) {
+            if (!reagents.containsKey(r)) {
+                continue;
+            }
             int change = reagents.get(r).radiusChange;
             if (change < decrease) {
                 decrease = change;
@@ -73,9 +79,12 @@ public class MeteorReagentRegistry {
     }
 
     // Return the one largest filler chance increase (above 0).
-    public static int getLargestFillerChanceIncrease(ArrayList<Reagent> reagentList) {
+    public static int getLargestFillerChanceIncrease(List<Reagent> reagentList) {
         int mult = 1;
         for (Reagent r : reagentList) {
+            if (!reagents.containsKey(r)) {
+                continue;
+            }
             int change = reagents.get(r).fillerChanceChange;
             if (change > mult) {
                 mult = change;
@@ -85,9 +94,12 @@ public class MeteorReagentRegistry {
     }
 
     // Return the one largest filler chance decrease (below 0).
-    public static int getLargestFillerChanceDecrease(ArrayList<Reagent> reagentList) {
+    public static int getLargestFillerChanceDecrease(List<Reagent> reagentList) {
         int mult = 1;
         for (Reagent r : reagentList) {
+            if (!reagents.containsKey(r)) {
+                continue;
+            }
             int change = reagents.get(r).fillerChanceChange;
             if (change < mult) {
                 mult = change;
@@ -97,9 +109,12 @@ public class MeteorReagentRegistry {
     }
 
     // Return the one largest filler chance multiplier (above 1.0).
-    public static double getLargestFillerChanceMultiplier(ArrayList<Reagent> reagentList) {
+    public static double getLargestFillerChanceMultiplier(List<Reagent> reagentList) {
         double mult = 1.0;
         for (Reagent r : reagentList) {
+            if (!reagents.containsKey(r)) {
+                continue;
+            }
             double change = reagents.get(r).fillerChanceMultiplier;
             if (change > mult) {
                 mult = change;
@@ -109,9 +124,12 @@ public class MeteorReagentRegistry {
     }
 
     // Return the one smallest filler chance multiplier (below 1.0).
-    public static double getSmallestFillerChanceMultiplier(ArrayList<Reagent> reagentList) {
+    public static double getSmallestFillerChanceMultiplier(List<Reagent> reagentList) {
         double mult = 1.0;
         for (Reagent r : reagentList) {
+            if (!reagents.containsKey(r)) {
+                continue;
+            }
             double change = reagents.get(r).fillerChanceMultiplier;
             if (change < mult) {
                 mult = change;
@@ -121,19 +139,26 @@ public class MeteorReagentRegistry {
     }
 
     // Return a list of the blocks that the given reagents will use to replace filler.
-    public static List<MeteorParadigmComponent> getFillerList(ArrayList<Reagent> reagentList) {
+    public static List<MeteorParadigmComponent> getFillerList(List<Reagent> reagentList) {
         List<MeteorParadigmComponent> fillerList = new ArrayList<>();
         for (Reagent r : reagentList) {
+            if (!reagents.containsKey(r)) {
+                continue;
+            }
             List<MeteorParadigmComponent> filler = reagents.get(r).parsedFillerList;
-            if (!filler.isEmpty()) {
+            if (filler != null && !filler.isEmpty()) {
                 fillerList.addAll(filler);
             }
         }
         return fillerList;
     }
 
-    public static boolean doExplosions(ArrayList<Reagent> reagentList) {
+    // Returns false if any of the given reagents disable explosions, otherwise true
+    public static boolean doExplosions(List<Reagent> reagentList) {
         for (Reagent r : reagentList) {
+            if (!reagents.containsKey(r)) {
+                continue;
+            }
             if (reagents.get(r).disableExplosions) {
                 return false;
             }
@@ -141,8 +166,15 @@ public class MeteorReagentRegistry {
         return true;
     }
 
-    public static boolean doMeteorsDestroyBlocks(ArrayList<Reagent> reagentList) {
+    // Returns the value of the config AlchemicalWizardry.doMeteorsDestroyBlocks if no reagent toggles explosion block
+    // damage
+    // Returns the inverse of the value of AlchemicalWizardry.doMeteorsDestroyBlocks if any reagent toggles explosion
+    // block damage
+    public static boolean doMeteorsDestroyBlocks(List<Reagent> reagentList) {
         for (Reagent r : reagentList) {
+            if (!reagents.containsKey(r)) {
+                continue;
+            }
             if (reagents.get(r).toggleExplosionBlockDamage) {
                 return !AlchemicalWizardry.doMeteorsDestroyBlocks;
             }

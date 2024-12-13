@@ -52,7 +52,7 @@ public class NEIMeteorRecipeHandler extends TemplateRecipeHandler {
             float componentRatio = 1 - fillerRatio;
 
             for (MeteorParadigmComponent component : sortedComponents) {
-                ItemStack stack = component.getValidBlockParadigm();
+                ItemStack stack = component.getBlock();
                 int xPos = 3 + 18 * col;
                 int yPos = 37 + 18 * row;
 
@@ -84,7 +84,7 @@ public class NEIMeteorRecipeHandler extends TemplateRecipeHandler {
                 float totalFillerWeight = meteor.getTotalListWeight(meteor.fillerList);
 
                 for (MeteorParadigmComponent filler : sortedFiller) {
-                    ItemStack stack = filler.getValidBlockParadigm();
+                    ItemStack stack = filler.getBlock();
                     int xPos = 3 + 18 * col;
                     int yPos = 37 + 18 * row;
 
@@ -193,10 +193,10 @@ public class NEIMeteorRecipeHandler extends TemplateRecipeHandler {
     @Override
     public void loadCraftingRecipes(ItemStack result) {
         for (MeteorParadigm meteor : getSortedMeteors()) {
-            if (meteor.componentList.stream().anyMatch(m -> matchItem(result, m.getValidBlockParadigm()))) {
+            if (meteor.componentList.stream().anyMatch(m -> matchItem(result, m.getBlock()))) {
                 arecipes.add(new CachedMeteorRecipe(meteor, result));
             }
-            if (meteor.fillerList.stream().anyMatch(m -> matchItem(result, m.getValidBlockParadigm()))) {
+            if (meteor.fillerList.stream().anyMatch(m -> matchItem(result, m.getBlock()))) {
                 arecipes.add(new CachedMeteorRecipe(meteor, result));
             }
         }
