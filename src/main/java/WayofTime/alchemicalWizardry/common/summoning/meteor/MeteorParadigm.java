@@ -78,23 +78,12 @@ public class MeteorParadigm {
                     }
                 }
 
-            } else {
-                // Legacy config
-                String oreDict = blockName;
-                int weight = Integer.parseInt(blockArray[++i]);
-
-                List<ItemStack> list = OreDictionary.getOres(oreDict);
-                for (ItemStack stack : list) {
-                    if (stack != null && stack.getItem() instanceof ItemBlock) {
-                        addList.add(new MeteorParadigmComponent(stack, weight));
-                        success = true;
-                        break;
-                    }
-                }
             }
 
             if (!success) {
                 AlchemicalWizardry.logger.warn("Unable to add Meteor Paradigm \"" + blockName + "\"");
+                AlchemicalWizardry.logger
+                        .warn("Valid formats are modId:itemName:meta:weight and OREDICT:oreDictName:weight.");
             }
         }
         return addList;
