@@ -34,12 +34,8 @@ public class EntityMeteor extends EnergyBlastProjectile {
 
         par1NBTTagCompound.setInteger("meteorID", meteorID);
 
-        System.out.println("Writing reagent list: ");
         for (Reagent r : reagentList) {
-            System.out.println(r.name + ": ");
             par1NBTTagCompound.setBoolean("reagent." + r.name, true);
-            System.out.println("NBT Tag: " + par1NBTTagCompound.getBoolean("reagent." + r.name));
-
         }
 
     }
@@ -49,12 +45,9 @@ public class EntityMeteor extends EnergyBlastProjectile {
         super.readEntityFromNBT(par1NBTTagCompound);
 
         meteorID = par1NBTTagCompound.getInteger("meteorID");
-
-        System.out.println("Reading reagent list: ");
         for (Reagent r : ReagentRegistry.reagentList.values()) {
             if (par1NBTTagCompound.getBoolean("reagent." + r.name)) {
                 reagentList.add(r);
-                System.out.print(r.name + ", ");
             }
         }
     }
