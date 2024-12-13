@@ -13,6 +13,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 
+import WayofTime.alchemicalWizardry.AlchemicalWizardry;
 import WayofTime.alchemicalWizardry.api.alchemy.energy.Reagent;
 import WayofTime.alchemicalWizardry.api.alchemy.energy.ReagentRegistry;
 
@@ -129,6 +130,24 @@ public class MeteorReagentRegistry {
             }
         }
         return fillerList;
+    }
+
+    public static boolean doExplosions(ArrayList<Reagent> reagentList) {
+        for (Reagent r : reagentList) {
+            if (reagents.get(r).disableExplosions) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static boolean doMeteorsDestroyBlocks(ArrayList<Reagent> reagentList) {
+        for (Reagent r : reagentList) {
+            if (reagents.get(r).toggleExplosionBlockDamage) {
+                return !AlchemicalWizardry.doMeteorsDestroyBlocks;
+            }
+        }
+        return AlchemicalWizardry.doMeteorsDestroyBlocks;
     }
 
     public static void generateDefaultConfig() {

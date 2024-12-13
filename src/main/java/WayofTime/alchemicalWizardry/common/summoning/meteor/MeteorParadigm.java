@@ -112,7 +112,9 @@ public class MeteorParadigm {
         int radius = getNewRadius(this.radius, reagents);
         int fillerChance = getNewFillerChance(this.fillerChance, reagents);
 
-        world.createExplosion(null, x, y, z, radius * 4, AlchemicalWizardry.doMeteorsDestroyBlocks);
+        if (MeteorReagentRegistry.doExplosions(reagents)) {
+            world.createExplosion(null, x, y, z, radius * 4, MeteorReagentRegistry.doMeteorsDestroyBlocks(reagents));
+        }
 
         List<MeteorParadigmComponent> fillerList;
 
