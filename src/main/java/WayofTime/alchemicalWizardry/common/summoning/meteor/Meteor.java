@@ -2,7 +2,6 @@ package WayofTime.alchemicalWizardry.common.summoning.meteor;
 
 import java.io.*;
 
-import com.google.gson.JsonObject;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 

@@ -12,8 +12,6 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import WayofTime.alchemicalWizardry.common.summoning.meteor.MeteorReagentRegistry;
-import WayofTime.alchemicalWizardry.common.summoning.meteor.MeteorRegistry;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -253,6 +251,7 @@ import WayofTime.alchemicalWizardry.common.spell.simple.SpellWateryGrave;
 import WayofTime.alchemicalWizardry.common.spell.simple.SpellWindGust;
 import WayofTime.alchemicalWizardry.common.summoning.SummoningHelperAW;
 import WayofTime.alchemicalWizardry.common.summoning.meteor.Meteor;
+import WayofTime.alchemicalWizardry.common.summoning.meteor.MeteorReagentRegistry;
 import WayofTime.alchemicalWizardry.common.tileEntity.TEAlchemicCalcinator;
 import WayofTime.alchemicalWizardry.common.tileEntity.TEAltar;
 import WayofTime.alchemicalWizardry.common.tileEntity.TEBellJar;

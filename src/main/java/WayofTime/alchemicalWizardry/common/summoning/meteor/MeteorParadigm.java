@@ -6,7 +6,6 @@ import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -14,6 +13,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.oredict.OreDictionary;
 
 import WayofTime.alchemicalWizardry.AlchemicalWizardry;
+import WayofTime.alchemicalWizardry.api.alchemy.energy.Reagent;
 import cpw.mods.fml.common.Optional;
 import cpw.mods.fml.common.registry.GameRegistry;
 import gregtech.common.blocks.TileEntityOres;
@@ -108,62 +108,23 @@ public class MeteorParadigm {
         return totalWeight;
     }
 
-    public void createMeteorImpact(World world, int x, int y, int z, boolean[] flags) {
-        boolean hasTerrae = false;
-        boolean hasOrbisTerrae = false;
-        boolean hasCrystallos = false;
-        boolean hasIncendium = false;
-        boolean hasTennebrae = false;
+    public void createMeteorImpact(World world, int x, int y, int z, ArrayList<Reagent> reagents) {
+        int radius = getNewRadius(this.radius, reagents);
+        int fillerChance = getNewFillerChance(this.fillerChance, reagents);
 
-        if (flags != null && flags.length >= 5) {
-            hasTerrae = flags[0];
-            hasOrbisTerrae = flags[1];
-            hasCrystallos = flags[2];
-            hasIncendium = flags[3];
-            hasTennebrae = flags[4];
-        }
-
-        int newRadius = radius;
-        int fillerChance = this.fillerChance;
-        if (hasOrbisTerrae) {
-            newRadius += 2;
-            fillerChance *= 1.12;
-        } else if (hasTerrae) {
-            newRadius += 1;
-            fillerChance *= 1.06;
-        }
-        if (fillerChance > 100) {
-            fillerChance = 100;
-        }
-
-        world.createExplosion(null, x, y, z, newRadius * 4, AlchemicalWizardry.doMeteorsDestroyBlocks);
+        world.createExplosion(null, x, y, z, radius * 4, AlchemicalWizardry.doMeteorsDestroyBlocks);
 
         List<MeteorParadigmComponent> fillerList;
 
-        if (hasCrystallos || hasIncendium || hasTennebrae) {
-            fillerList = new ArrayList<>();
-            if (hasCrystallos) {
-                fillerList.add(new MeteorParadigmComponent(new ItemStack(Blocks.ice), 180)); // 180 = 2^2 * 3^2 * 5
-            }
-            if (hasIncendium) {
-                fillerList.add(new MeteorParadigmComponent(new ItemStack(Blocks.netherrack), 60));
-                fillerList.add(new MeteorParadigmComponent(new ItemStack(Blocks.soul_sand), 60));
-                fillerList.add(new MeteorParadigmComponent(new ItemStack(Blocks.glowstone), 60));
-            }
-            if (hasTennebrae) {
-                fillerList.add(new MeteorParadigmComponent(new ItemStack(Blocks.obsidian), 180));
-            }
-        } else {
-            fillerList = this.fillerList;
-        }
+        fillerList = getNewFillerList(this.fillerList, reagents);
 
         int totalComponentWeight = getTotalListWeight(componentList);
         int totalFillerWeight = getTotalListWeight(fillerList);
 
-        for (int i = -newRadius; i <= newRadius; i++) {
-            for (int j = -newRadius; j <= newRadius; j++) {
-                for (int k = -newRadius; k <= newRadius; k++) {
-                    if (i * i + j * j + k * k >= (newRadius + 0.50f) * (newRadius + 0.50f)) {
+        for (int i = -radius; i <= radius; i++) {
+            for (int j = -radius; j <= radius; j++) {
+                for (int k = -radius; k <= radius; k++) {
+                    if (i * i + j * j + k * k >= (radius + 0.50f) * (radius + 0.50f)) {
                         continue;
                     }
 
@@ -178,6 +139,30 @@ public class MeteorParadigm {
                     }
                 }
             }
+        }
+    }
+
+    private int getNewRadius(int radius, ArrayList<Reagent> reagents) {
+        radius += MeteorReagentRegistry.getLargestRadiusIncrease(reagents);
+        radius += MeteorReagentRegistry.getLargestRadiusDecrease(reagents);
+        return Math.max(radius, 1);
+    }
+
+    private int getNewFillerChance(int fillerChance, ArrayList<Reagent> reagents) {
+        fillerChance += MeteorReagentRegistry.getLargestFillerChanceIncrease(reagents);
+        fillerChance += MeteorReagentRegistry.getLargestFillerChanceDecrease(reagents);
+        fillerChance *= MeteorReagentRegistry.getLargestFillerChanceMultiplier(reagents);
+        fillerChance *= MeteorReagentRegistry.getSmallestFillerChanceMultiplier(reagents);
+        return Math.min(fillerChance, 100);
+    }
+
+    private List<MeteorParadigmComponent> getNewFillerList(List<MeteorParadigmComponent> fillerList,
+            ArrayList<Reagent> reagents) {
+        List<MeteorParadigmComponent> reagentFillers = new ArrayList<>(MeteorReagentRegistry.getFillerList(reagents));
+        if (reagentFillers.isEmpty()) {
+            return fillerList;
+        } else {
+            return reagentFillers;
         }
     }
 

@@ -8,6 +8,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import net.minecraftforge.oredict.OreDictionary;
 
+import WayofTime.alchemicalWizardry.api.alchemy.energy.Reagent;
+
 public class MeteorRegistry {
 
     public static List<MeteorParadigm> paradigmList = new ArrayList<>();
@@ -34,9 +36,10 @@ public class MeteorRegistry {
         }
     }
 
-    public static void createMeteorImpact(World world, int x, int y, int z, int paradigmID, boolean[] flags) {
+    public static void createMeteorImpact(World world, int x, int y, int z, int paradigmID,
+            ArrayList<Reagent> reagents) {
         if (paradigmID < paradigmList.size()) {
-            paradigmList.get(paradigmID).createMeteorImpact(world, x, y, z, flags);
+            paradigmList.get(paradigmID).createMeteorImpact(world, x, y, z, reagents);
         }
     }
 
