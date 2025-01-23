@@ -217,9 +217,9 @@ public class NEIMeteorRecipeHandler extends TemplateRecipeHandler {
         int cost = meteorRecipe.getCost();
         int radius = meteorRecipe.getRadius();
         Minecraft.getMinecraft().fontRenderer
-                .drawString(I18n.format("nei.recipe.meteor.cost", String.format("%,d", cost)), 2, 168, 0x000000);
+                .drawString(I18n.format("nei.recipe.meteor.cost", String.format("%,d", cost)), 2, 163, 0x000000);
         Minecraft.getMinecraft().fontRenderer
-                .drawString(I18n.format("nei.recipe.meteor.radius", radius), 2, 179, 0x000000);
+                .drawString(I18n.format("nei.recipe.meteor.radius", radius), 2, 172, 0x000000);
     }
 
     @Override
